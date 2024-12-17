@@ -1,55 +1,78 @@
 package com.techhub.gradlemain;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class TableFormatter {
 
-    public static void main(String[] args) {
-        // Example data
-        String[] headers = {"Name", "Age", "City", "Occupation"};
-        String[][] data = {
-                {"Alice", "30", "New York", "Engineer"},
-                {"Bob", "25", "San Francisco", "Designer"},
-                {"Charlie", "35", "Chicago", "Teacher"},
-                {"Diana", "28", "Los Angeles", "Doctor"},
-                {"Eleanor", "40", "A very long city name that exceeds fifty characters to test wrapping", "A very long occupation description that also exceeds fifty characters for wrapping"},
-                {"Franklin Delano Roosevelt", "51", "Warm Springs, Georgia, USA", "President of the United States with a long term of service"},
-                {"Jonathan Livingston Seagull", "N/A", "An imaginary beachside in the universe of the book", "Protagonist of a philosophical novel"},
-                {"Alexandria Cassandra", "29", "A mystical city with a name that spans beyond thirty characters", "A creative artist and visionary with an extended portfolio"},
-                {"Beatrice", "33", "A town with a historic background and scenic beauty", "Historian and writer with a passion for storytelling"}
-        };
+    /* The NEW_LINE Constant */
+    private static final String NEW_LINE = "\n";
 
-        // Print formatted table
-        printTable(headers, data);
+    /* The VERTICAL_BAR Constant */
+    private static final String VERTICAL_BAR = "|";
+
+    /* The ONE_SPACE Constant */
+    private static final String ONE_SPACE = " ";
+
+    /* The PLUS Constant */
+    private static final String PLUS = "+";
+
+    /* The MINUS Constant */
+    private static final String MINUS = "-";
+
+    /* The STR_S Constant */
+    private static final String S = "s";
+
+    /* The PERCENTAGE_MINUS Constant */
+    private static final String PERCENTAGE_MINUS = "%-";
+
+    /* The PERCENTAGE_MINUS Constant */
+    private static final String EQUAL = "=";
+
+    /* The EMPTY_TEXT Constant */
+    private static final String EMPTY_TEXT = "";
+
+    /* The ZERO Constant */
+    private static final byte ZERO = 0;
+
+    /* The TWO Constant */
+    private static final byte TWO = 2;
+
+    /* The THIRTY Constant */
+    private static final byte THIRTY = 30;
+
+    /* The maxColumnWidth  */
+    private final int[] maxColumnWidth;
+
+    /* The table headers  */
+    private final String[] headers;
+
+    /* The table columns data */
+    private final String[][] data;
+
+    /* The columnWidths  */
+    private int[] columnWidths;
+
+    public TableFormatter(String[] headers, String[][] data){
+        this.headers = headers;
+        this.data = data;
+        this.maxColumnWidth = new int[this.headers.length];
+        Arrays.fill(this.maxColumnWidth, THIRTY);
+        this.calculateColumnWidths();
     }
 
-    public static void printTable(String[] headers, String[][] data) {
-        // Calculate column widths
-        int[] columnWidths = calculateColumnWidths(headers, data);
+    private void calculateColumnWidths() {
+        int columns = this.headers.length;
+        this.columnWidths = new int[columns];
 
-        // Print header row
-        printRow(headers, columnWidths, true);
-
-        // Print data rows
-        for (String[] row : data) {
-            printRow(row, columnWidths, false);
-        }
-    }
-
-    private static int[] calculateColumnWidths(String[] headers, String[][] data) {
-        int columns = headers.length;
-        int[] columnWidths = new int[columns];
-
-        // Initialize with header lengths
-        for (int i = 0; i < columns; i++) {
-            columnWidths[i] = headers[i].length();
+        for (int i = ZERO; i < columns; i++) {
+            columnWidths[i] = this.headers[i].length();
         }
 
-        // Update with max data lengths
-        for (String[] row : data) {
-            for (int i = 0; i < columns; i++) {
-                String[] wrappedText = wrapText(row[i], 30); // Assuming a max width of 30 characters
+        for (String[] row : this.data) {
+            for (int i = ZERO; i < columns; i++) {
+                String[] wrappedText = wrapText(row[i], this.maxColumnWidth[i]);
                 for (String line : wrappedText) {
                     if (line.length() > columnWidths[i]) {
                         columnWidths[i] = line.length();
@@ -57,56 +80,83 @@ public class TableFormatter {
                 }
             }
         }
-
-        return columnWidths;
     }
 
-    private static void printRow(String[] row, int[] columnWidths, boolean isHeader) {
-        StringBuilder builder = new StringBuilder();
+    public String getTableText() {
 
-        // Wrap each column's text and calculate the maximum number of lines
+        StringBuilder tableText = new StringBuilder();
+
+        String headSeparator = this.getSeparator(EQUAL);
+        String rowSeparator = this.getSeparator(MINUS);
+        tableText.append(headSeparator)
+                .append(NEW_LINE)
+                .append(this.getRowText(this.headers))
+                .append(headSeparator)
+                .append(NEW_LINE);
+
+        for (String[] row : this.data) {
+            tableText.append(this.getRowText(row)).append(rowSeparator).append(NEW_LINE);
+        }
+        return tableText.toString();
+    }
+
+    public StringBuilder getRowText(String[] row) {
+
+        StringBuilder rowText = new StringBuilder();
         List<String[]> wrappedColumns = new ArrayList<>();
-        int maxLines = 0;
-        for (int i = 0; i < row.length; i++) {
-            String[] wrappedText = wrapText(row[i], 30); // Assuming a max width of 30 characters
+        int maxLines = ZERO;
+        for (int i = ZERO; i < row.length; i++) {
+            String[] wrappedText = this.wrapText(row[i], this.maxColumnWidth[i]);
             wrappedColumns.add(wrappedText);
             maxLines = Math.max(maxLines, wrappedText.length);
         }
 
-        // Print each line of the wrapped text
-        for (int line = 0; line < maxLines; line++) {
-            builder.setLength(0); // Clear the builder
-            for (int i = 0; i < wrappedColumns.size(); i++) {
-                builder.append("|");
-                builder.append(" ");
-                String text = (line < wrappedColumns.get(i).length) ? wrappedColumns.get(i)[line] : "";
-                builder.append(String.format("%-" + columnWidths[i] + "s", text));
-                builder.append(" ");
+        StringBuilder rowWrapText = new StringBuilder();
+        for (int line = ZERO; line < maxLines; line++) {
+            rowWrapText.setLength(ZERO);
+            for (int i = ZERO; i < wrappedColumns.size(); i++) {
+                rowWrapText.append(VERTICAL_BAR);
+                rowWrapText.append(ONE_SPACE);
+                String text = (line < wrappedColumns.get(i).length) ? wrappedColumns.get(i)[line] : EMPTY_TEXT;
+                rowWrapText.append(String.format(PERCENTAGE_MINUS + this.columnWidths[i] + S, text));
+                rowWrapText.append(ONE_SPACE);
             }
-            builder.append("|");
-            System.out.println(builder);
+            rowWrapText.append(VERTICAL_BAR).append(NEW_LINE);
+            rowText.append(rowWrapText);
         }
-
-        // Print separator for headers
-        if (isHeader) {
-            StringBuilder separator = new StringBuilder();
-            for (int width : columnWidths) {
-                separator.append("+");
-                separator.append("-".repeat(width + 2));
-            }
-            separator.append("+");
-            System.out.println(separator);
-        }
+        return rowText;
     }
 
-    private static String[] wrapText(String text, int maxWidth) {
+    private String[] wrapText(String text, int maxWidth) {
         List<String> lines = new ArrayList<>();
-        int start = 0;
+        int start = ZERO;
         while (start < text.length()) {
             int end = Math.min(start + maxWidth, text.length());
             lines.add(text.substring(start, end));
             start = end;
         }
-        return lines.toArray(new String[0]);
+        return lines.toArray(new String[ZERO]);
+    }
+
+    public String getSeparator(String separator) {
+        StringBuilder headSeparator = new StringBuilder();
+        for (int width : this.columnWidths) {
+            headSeparator.append(PLUS);
+            headSeparator.append(separator.repeat(width + TWO));
+        }
+        headSeparator.append(PLUS);
+        return headSeparator.toString();
+    }
+
+    public void setColumnWidths(int ... widths){
+        if(widths.length == this.maxColumnWidth.length){
+            System.arraycopy(widths, ZERO, this.maxColumnWidth, ZERO, this.maxColumnWidth.length);
+            System.arraycopy(widths, ZERO, this.columnWidths, ZERO, this.maxColumnWidth.length);
+        }
+    }
+
+    public void setColumnWidth(int columnIndex, int width){
+        this.maxColumnWidth[columnIndex] = width;
+        this.columnWidths[columnIndex]= width;
     }
 }
