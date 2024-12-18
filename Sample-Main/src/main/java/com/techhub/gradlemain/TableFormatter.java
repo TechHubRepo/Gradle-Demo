@@ -54,7 +54,9 @@ public class TableFormatter {
     /* The columnWidths  */
     private int[] columnWidths;
 
-    public TableFormatter(String[] headers, String[][] data){
+    private boolean enableRowSeparator;
+
+    public TableFormatter(String[] headers, String[][] data) {
         this.headers = headers;
         this.data = data;
         this.maxColumnWidth = new int[this.headers.length];
@@ -87,7 +89,12 @@ public class TableFormatter {
         StringBuilder tableText = new StringBuilder();
 
         String headSeparator = this.getSeparator(EQUAL);
-        String rowSeparator = this.getSeparator(MINUS);
+        String rowSeparator = EMPTY_TEXT;
+
+        if (this.enableRowSeparator) {
+            rowSeparator = this.getSeparator(MINUS) + NEW_LINE;
+        }
+
         tableText.append(headSeparator)
                 .append(NEW_LINE)
                 .append(this.getRowText(this.headers))
@@ -95,8 +102,13 @@ public class TableFormatter {
                 .append(NEW_LINE);
 
         for (String[] row : this.data) {
-            tableText.append(this.getRowText(row)).append(rowSeparator).append(NEW_LINE);
+            tableText.append(this.getRowText(row)).append(rowSeparator);
         }
+
+        if (!this.enableRowSeparator) {
+            tableText.append(this.getSeparator(MINUS));
+        }
+
         return tableText.toString();
     }
 
@@ -118,6 +130,7 @@ public class TableFormatter {
                 rowWrapText.append(VERTICAL_BAR);
                 rowWrapText.append(ONE_SPACE);
                 String text = (line < wrappedColumns.get(i).length) ? wrappedColumns.get(i)[line] : EMPTY_TEXT;
+
                 rowWrapText.append(String.format(PERCENTAGE_MINUS + this.columnWidths[i] + S, text));
                 rowWrapText.append(ONE_SPACE);
             }
@@ -148,15 +161,19 @@ public class TableFormatter {
         return headSeparator.toString();
     }
 
-    public void setColumnWidths(int ... widths){
-        if(widths.length == this.maxColumnWidth.length){
+    public void setColumnWidths(int... widths) {
+        if (widths.length == this.maxColumnWidth.length) {
             System.arraycopy(widths, ZERO, this.maxColumnWidth, ZERO, this.maxColumnWidth.length);
             System.arraycopy(widths, ZERO, this.columnWidths, ZERO, this.maxColumnWidth.length);
         }
     }
 
-    public void setColumnWidth(int columnIndex, int width){
+    public void setColumnWidth(int columnIndex, int width) {
         this.maxColumnWidth[columnIndex] = width;
-        this.columnWidths[columnIndex]= width;
+        this.columnWidths[columnIndex] = width;
+    }
+
+    public void enableRowSeparator(boolean flag) {
+        this.enableRowSeparator = flag;
     }
 }

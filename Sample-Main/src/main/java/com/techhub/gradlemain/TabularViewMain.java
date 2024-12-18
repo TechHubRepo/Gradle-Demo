@@ -28,6 +28,7 @@ public class TabularViewMain {
         };
 
         TableFormatter tableFormatter = new TableFormatter(headers,data);
+//        tableFormatter.enableRowSeparator(true);
 //        tableFormatter.setColumnWidths(10,3,50,100);
 //        tableFormatter.setColumnWidth(2,100);
 //        tableFormatter.setColumnWidth(3,100);
