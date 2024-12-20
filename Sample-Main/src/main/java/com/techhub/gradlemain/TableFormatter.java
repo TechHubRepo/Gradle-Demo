@@ -130,8 +130,9 @@ public class TableFormatter {
                 rowWrapText.append(VERTICAL_BAR);
                 rowWrapText.append(ONE_SPACE);
                 String text = (line < wrappedColumns.get(i).length) ? wrappedColumns.get(i)[line] : EMPTY_TEXT;
-
-                rowWrapText.append(String.format(PERCENTAGE_MINUS + this.columnWidths[i] + S, text));
+                StringBuilder sb = new StringBuilder(PERCENTAGE_MINUS)
+                        .append(this.columnWidths[i]).append(S);
+                rowWrapText.append(String.format(sb.toString(), text));
                 rowWrapText.append(ONE_SPACE);
             }
             rowWrapText.append(VERTICAL_BAR).append(NEW_LINE);
